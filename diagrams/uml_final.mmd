@@ -1,6 +1,6 @@
 classDiagram
-    %% Superseded by uml_draft.mmd (Phase 1) and uml_final.mmd (Phase 6).
-    %% Kept in sync with the final implementation in pawpal_system.py.
+    %% PawPal+ — Phase 6 FINAL architecture.
+    %% Matches pawpal_system.py, including the algorithmic + extension methods.
 
     class Owner {
         +str name
@@ -8,6 +8,8 @@ classDiagram
         +add_pet(pet) Pet
         +get_pet(name) Pet
         +all_tasks() list~Task~
+        +to_dict() dict
+        +from_dict(data)$ Owner
     }
 
     class Pet {
@@ -17,6 +19,9 @@ classDiagram
         +list~Task~ tasks
         +add_task(task) Task
         +task_count() int
+        +get_tasks() list~Task~
+        +to_dict() dict
+        +from_dict(data)$ Pet
     }
 
     class Task {
@@ -26,21 +31,36 @@ classDiagram
         +str priority
         +str frequency
         +bool completed
+        +str pet_name
         +date due_date
         +mark_complete() void
+        +priority_rank() int
+        +time_in_minutes() int
+        +end_in_minutes() int
         +next_occurrence() Task
+        +type_emoji() str
+        +status_emoji() str
+        +to_dict() dict
+        +from_dict(data)$ Task
     }
 
     class Scheduler {
         +Owner owner
+        +get_all_tasks() list~Task~
         +sort_by_time(tasks) list~Task~
         +sort_by_priority(tasks) list~Task~
+        +filter_by_status(completed, tasks) list~Task~
         +filter_by_pet(name, tasks) list~Task~
         +detect_conflicts(tasks) list~str~
         +mark_task_complete(task) Task
         +next_available_slot(minutes) str
+        +todays_schedule(sort_by, pet_name) str
+        +format_table(tasks) str
     }
 
     Owner "1" o-- "many" Pet : has
     Pet "1" o-- "many" Task : schedules
-    Scheduler "1" --> "1" Owner : reads
+    Scheduler "1" --> "1" Owner : reads &amp; organizes
+    Scheduler ..> Task : sorts / filters / recurs
+
+    note for Scheduler "mark_task_complete() auto-spawns\nthe next Task for daily/weekly frequency"
